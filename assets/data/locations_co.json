@@ -1,0 +1,27 @@
+{
+  "countries": [
+    "Colombia"
+  ],
+  "departments": {
+    "Colombia": [
+      "Valle del Cauca",
+      "Antioquia",
+      "Cundinamarca"
+    ]
+  },
+  "cities": {
+    "Colombia::Valle del Cauca": [
+      "Cali",
+      "Palmira",
+      "Buga"
+    ],
+    "Colombia::Antioquia": [
+      "Medellín",
+      "Envigado"
+    ],
+    "Colombia::Cundinamarca": [
+      "Bogotá",
+      "Soacha"
+    ]
+  }
+}
