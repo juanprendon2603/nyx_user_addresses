@@ -1,34 +1,34 @@
-# Prueba Flutter - Usuarios y Direcciones
+# NYX User Addresses (Flutter)
 
-Proyecto base para la prueba técnica (3 pantallas): datos básicos, direcciones con cascada País/Departamento/Municipio y resumen con persistencia local.
+Prueba técnica **Double V Partners — NYX**  
+Crea usuarios, agrega **múltiples direcciones** (País/Departamento/Municipio) y consulta todo en un **resumen** con estado reactivo.
 
-## Stack
-- Flutter + Material 3
-- Riverpod (StateNotifier)
-- GoRouter
-- Freezed + json_serializable
-- Hive (persistencia simple)
-- Tests: unit (validators, notifier) y widget (pendiente de ejemplo completo)
+## ✨ Funcionalidades
 
-## Correr
+- Formulario de **Usuario** (Nombre, Apellido, Fecha de nacimiento).
+- Editor de **Direcciones** (Colombia → Departamento → Municipio) con validaciones.
+- **Multiusuario**: lista de usuarios, selección y eliminación.
+- **Resumen** en tiempo real (Riverpod).
+- UI con **Material 3**, tema custom y pantalla de **bienvenida**.
+
+## 🧱 Arquitectura (resumen)
+
+- **Presentation**: Widgets/UI + `go_router` + Providers de Riverpod.
+- **Domain**: Entidades puras (`NyxUser`, `Address`).
+- **Data**: Datasource de ubicaciones desde asset JSON (`assets/data/locations_co.json`).
+- **Estado**: Riverpod (`usersProvider`, `selectedUserIdProvider`, `userProvider` derivado).
+
+> Persistencia: **no** se guarda en disco en este MVP. Se dejó listo para enchufar una capa de storage (p.ej. Hive o SharedPreferences) si se requiere.
+
+## 🛠️ Requisitos
+
+- Flutter 3.x / Dart 3.x
+- iOS: Xcode con runtime del simulador instalado
+- Android: SDK/Emulador configurado
+
+## ▶️ Ejecutar
+
 ```bash
 flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
 flutter run
 ```
-
-## Tests
-```bash
-flutter test
-```
-
-## Decisiones
-- Dataset de ubicaciones en `assets/data/locations_co.json` (fácil de extender).
-- Persistencia con Hive en un solo box `user_box`.
-- Arquitectura en capas (domain/data/presentation) para mantener testabilidad.
-
-## Mejoras futuras
-- i18n
-- Validaciones adicionales y máscaras de inputs
-- Adapters tipados de Hive
-- Diseño visual más pulido y estados de carga/errores más ricos
