@@ -13,6 +13,8 @@ class NyxApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'NYX User Addresses',
       theme: buildTheme(),
+      darkTheme: buildDarkTheme(),
+      themeMode: ThemeMode.system,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
     );

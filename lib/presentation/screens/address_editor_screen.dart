@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../domain/entities/address.dart';
 import '../providers/locations_notifier.dart';
 import '../providers/user_notifier.dart';
+import '../widgets/app_scaffold.dart';
 
 class AddressEditorScreen extends ConsumerStatefulWidget {
-  const AddressEditorScreen({super.key});
+  const AddressEditorScreen({super.key, this.initial});
+  final Address? initial;
 
   @override
   ConsumerState<AddressEditorScreen> createState() =>
@@ -24,6 +26,20 @@ class _AddressEditorScreenState extends ConsumerState<AddressEditorScreen> {
   String? _municipality;
 
   @override
+  void initState() {
+    super.initState();
+    _country = 'Colombia';
+    final a = widget.initial;
+    if (a != null) {
+      _country = a.country;
+      _department = a.department;
+      _municipality = a.municipality;
+      _line1.text = a.line1;
+      if (a.line2 != null) _line2.text = a.line2!;
+    }
+  }
+
+  @override
   void dispose() {
     _line1.dispose();
     _line2.dispose();
@@ -37,12 +53,27 @@ class _AddressEditorScreenState extends ConsumerState<AddressEditorScreen> {
     final munAsync =
         ref.watch(municipalitiesProvider((_country ?? '', _department ?? '')));
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Agregar dirección')),
-      body: Form(
+    return AppScaffold(
+      title: widget.initial == null ? 'Agregar dirección' : 'Editar dirección',
+      actions: [
+        IconButton(
+          tooltip: 'Refrescar ubicaciones',
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            ref.invalidate(locationsRepositoryProvider);
+            ref.invalidate(countriesProvider);
+            if (_country != null) {
+              ref.invalidate(departmentsProvider(_country!));
+            }
+            if (_country != null && _department != null) {
+              ref.invalidate(municipalitiesProvider((_country!, _department!)));
+            }
+          },
+        ),
+      ],
+      child: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+        child: Column(
           children: [
             countriesAsync.when(
               data: (countries) => DropdownButtonFormField<String>(
@@ -103,8 +134,10 @@ class _AddressEditorScreenState extends ConsumerState<AddressEditorScreen> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _line1,
-              decoration:
-                  const InputDecoration(labelText: 'Dirección (línea 1)'),
+              decoration: const InputDecoration(
+                labelText: 'Dirección (línea 1)',
+                hintText: 'Cra 7 # 12-34',
+              ),
               validator: (v) => (v == null || v.trim().isEmpty)
                   ? 'Ingresa la dirección'
                   : null,
@@ -112,34 +145,49 @@ class _AddressEditorScreenState extends ConsumerState<AddressEditorScreen> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _line2,
-              decoration:
-                  const InputDecoration(labelText: 'Complemento (opcional)'),
+              decoration: const InputDecoration(
+                labelText: 'Complemento (opcional)',
+                hintText: 'Apto 502, Torre B',
+              ),
             ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              icon: const Icon(Icons.add_location_alt_outlined),
-              label: const Text('Guardar dirección'),
-              onPressed: () {
-                if (!_formKey.currentState!.validate()) return;
-                final addr = Address(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  line1: _line1.text.trim(),
-                  line2: _line2.text.trim().isEmpty ? null : _line2.text.trim(),
-                  country: _country!,
-                  department: _department!,
-                  municipality: _municipality!,
-                );
-                ref.read(userProvider.notifier).addOrUpdateAddress(addr);
-                context.go('/summary');
-              },
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.save),
+                label: Text(
+                  widget.initial == null
+                      ? 'Guardar dirección'
+                      : 'Guardar cambios',
+                ),
+                onPressed: () {
+                  if (!_formKey.currentState!.validate()) return;
+                  final addr = Address(
+                    id: widget.initial?.id ??
+                        DateTime.now().millisecondsSinceEpoch.toString(),
+                    line1: _line1.text.trim(),
+                    line2:
+                        _line2.text.trim().isEmpty ? null : _line2.text.trim(),
+                    country: _country!,
+                    department: _department!,
+                    municipality: _municipality!,
+                  );
+                  ref.read(userProvider.notifier).addOrUpdateAddress(addr);
+                  context.go('/summary');
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.list_alt),
+                label: const Text('Ver resumen'),
+                onPressed: () => context.go('/summary'),
+              ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.list_alt),
-        label: const Text('Ver resumen'),
-        onPressed: () => context.go('/summary'),
       ),
     );
   }
